@@ -36,7 +36,7 @@ This repository contains Terraform configuration files to provision infrastructu
 2. Navigate to the repository directory:
 
    ```bash
-   cd terraform-small-project
+   cd terraform-secured--ec2-vpc-setup
    ```
 
 3. Create a `variables.tfvars` file with your desired configuration:
@@ -54,6 +54,12 @@ This repository contains Terraform configuration files to provision infrastructu
    ```
 
 5. Apply the Terraform configuration:
+
+   ```bash
+   terraform plan -var-file=variables.tfvars
+   ```
+
+6. Apply the Terraform configuration:
 
    ```bash
    terraform apply -var-file=variables.tfvars
