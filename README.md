@@ -52,14 +52,20 @@ This repository contains Terraform configuration files to provision infrastructu
    ```bash
    terraform init
    ```
+   
+5. Validate the Terraform configuration:
 
-5. Apply the Terraform configuration:
+   ```bash
+   terraform validate
+   ```
+
+6. Plan the Terraform configuration:
 
    ```bash
    terraform plan -var-file=variables.tfvars
    ```
 
-6. Apply the Terraform configuration:
+7. Apply the Terraform configuration:
 
    ```bash
    terraform apply -var-file=variables.tfvars
