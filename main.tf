@@ -10,26 +10,32 @@ resource "aws_vpc" "my_vpc" {
   }
 }
 
+# subnet.tf
+
 # Define public subnet
 resource "aws_subnet" "public_subnet" {
-  vpc_id = aws_vpc.my_vpc.id # Associate subnet with the VPC
-  cidr_block = "10.0.1.0/24" # Define the CIDR block for the subnet
+  vpc_id            = aws_vpc.my_vpc.id # Associate subnet with the VPC
+  cidr_block        = "10.0.1.0/24" # Define the CIDR block for the subnet
   availability_zone = "us-east-1a" # Specify the desired availability zone
   map_public_ip_on_launch = true # Enable auto-assign public IP addresses
   tags = {
     Name = "public-subnet" # Add tags to identify the subnet
   }
+  depends_on = [aws_vpc.my_vpc] # Ensure VPC is created first
 }
 
 # Define private subnet
 resource "aws_subnet" "private_subnet" {
-  vpc_id = aws_vpc.my_vpc.id # Associate subnet with the VPC
-  cidr_block = "10.0.2.0/24" # Define the CIDR block for the subnet
+  vpc_id            = aws_vpc.my_vpc.id # Associate subnet with the VPC
+  cidr_block        = "10.0.2.0/24" # Define the CIDR block for the subnet
   availability_zone = "us-east-1a" # Specify the desired availability zone
   tags = {
     Name = "private-subnet" # Add tags to identify the subnet
   }
+  depends_on = [aws_vpc.my_vpc] # Ensure VPC is created first
 }
+
+# security_groups.tf
 
 # Define security group for public instances
 resource "aws_security_group" "public_sg" {
@@ -59,6 +65,7 @@ resource "aws_security_group" "public_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  depends_on = [aws_vpc.my_vpc] # Ensure VPC is created first
 }
 
 # Define security group for private instances
@@ -81,7 +88,10 @@ resource "aws_security_group" "private_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  depends_on = [aws_vpc.my_vpc, aws_subnet.public_subnet] # Ensure VPC and public subnet are created first
 }
+
+# instances.tf
 
 # Define public EC2 instance
 resource "aws_instance" "public_instance" {
@@ -93,6 +103,7 @@ resource "aws_instance" "public_instance" {
   tags = {
     Name = "public-instance" # Add tags to identify the instance
   }
+  depends_on = [aws_vpc.my_vpc, aws_subnet.public_subnet, aws_security_group.public_sg] # Ensure VPC, public subnet, and security group are created first
 }
 
 # Define private EC2 instance
@@ -104,5 +115,5 @@ resource "aws_instance" "private_instance" {
   tags = {
     Name = "private-instance" # Add tags to identify the instance
   }
+  depends_on = [aws_vpc.my_vpc, aws_subnet.private_subnet, aws_security_group.private_sg] # Ensure VPC, private subnet, and security group are created first
 }
-
