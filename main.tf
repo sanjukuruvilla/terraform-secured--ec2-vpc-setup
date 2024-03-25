@@ -10,34 +10,32 @@ resource "aws_vpc" "my_vpc" {
   }
 }
 
-# subnet.tf
+# subnet
 
-# Define public EC2 instance
-resource "aws_instance" "public_instance" {
-  ami             = var.ami_id # Specify the desired AMI ID
-  instance_type   = var.instance_type # Specify the instance type
-  subnet_id       = aws_subnet.public_subnet.id # Associate instance with public subnet
-  vpc_security_group_ids = [aws_security_group.public_sg.id] # Associate instance with public security group
-  key_name        = var.key_name # Specify the key pair name for SSH access
+# Define public subnet
+resource "aws_subnet" "public_subnet" {
+  vpc_id            = aws_vpc.my_vpc.id # Associate subnet with the VPC
+  cidr_block        = "10.0.1.0/24" # Define the CIDR block for the subnet
+  availability_zone = "us-east-1a" # Specify the desired availability zone
+  map_public_ip_on_launch = true # Enable auto-assign public IP addresses
   tags = {
-    Name = "public-instance" # Add tags to identify the instance
+    Name = "public-subnet" # Add tags to identify the subnet
   }
-  depends_on = [aws_vpc.my_vpc, aws_subnet.public_subnet, aws_security_group.public_sg] # Ensure VPC, public subnet, and security group are created first
+  depends_on = [aws_vpc.my_vpc] # Ensure VPC is created first
 }
 
-# Define private EC2 instance
-resource "aws_instance" "private_instance" {
-  ami             = var.ami_id # Specify the desired AMI ID
-  instance_type   = var.instance_type # Specify the instance type
-  subnet_id       = aws_subnet.private_subnet.id # Associate instance with private subnet
-  vpc_security_group_ids = [aws_security_group.private_sg.id] # Associate instance with private security group
+# Define private subnet
+resource "aws_subnet" "private_subnet" {
+  vpc_id            = aws_vpc.my_vpc.id # Associate subnet with the VPC
+  cidr_block        = "10.0.2.0/24" # Define the CIDR block for the subnet
+  availability_zone = "us-east-1a" # Specify the desired availability zone
   tags = {
-    Name = "private-instance" # Add tags to identify the instance
+    Name = "private-subnet" # Add tags to identify the subnet
   }
-  depends_on = [aws_vpc.my_vpc, aws_subnet.private_subnet, aws_security_group.private_sg] # Ensure VPC, private subnet, and security group are created first
+  depends_on = [aws_vpc.my_vpc] # Ensure VPC is created first
 }
 
-# security_groups.tf
+# security_groups
 
 # Define security group for public instances
 resource "aws_security_group" "public_sg" {
@@ -100,7 +98,7 @@ resource "aws_instance" "public_instance" {
   ami             = var.ami_id # Specify the desired AMI ID
   instance_type   = var.instance_type # Specify the instance type
   subnet_id       = aws_subnet.public_subnet.id # Associate instance with public subnet
-  security_groups = [aws_security_group.public_sg.name] # Associate instance with public security group
+  vpc_security_group_ids = [aws_security_group.public_sg.id] # Associate instance with public security group
   key_name        = var.key_name # Specify the key pair name for SSH access
   tags = {
     Name = "public-instance" # Add tags to identify the instance
@@ -113,9 +111,10 @@ resource "aws_instance" "private_instance" {
   ami             = var.ami_id # Specify the desired AMI ID
   instance_type   = var.instance_type # Specify the instance type
   subnet_id       = aws_subnet.private_subnet.id # Associate instance with private subnet
-  security_groups = [aws_security_group.private_sg.name] # Associate instance with private security group
+  vpc_security_group_ids = [aws_security_group.private_sg.id] # Associate instance with private security group
   tags = {
     Name = "private-instance" # Add tags to identify the instance
   }
   depends_on = [aws_vpc.my_vpc, aws_subnet.private_subnet, aws_security_group.private_sg] # Ensure VPC, private subnet, and security group are created first
 }
+
