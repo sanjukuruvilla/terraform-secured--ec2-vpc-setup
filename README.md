@@ -36,6 +36,7 @@ This repository contains Terraform configuration files to provision secure infra
 - **variables.tf**: Defines variables used in the Terraform configuration.
 - **main.tf**: Contains the main Terraform configuration for provisioning infrastructure.
 - **variables.tfvars**: Contains the variables configuration for provisioning infrastructure.
+- **userdata.sh**: Script file for configurating the ec2 instance.
 
 
 ## Usage
