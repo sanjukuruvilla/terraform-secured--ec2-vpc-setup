@@ -19,9 +19,12 @@ Before you begin, ensure you have the following prerequisites:
 - A key pair created in AWS for SSH access to the EC2 instances.
 
 - You can clone the scripts from the repository below to install the awscli and Terraform:
+  - Make sure to give execution permission using 'chmod +x TF.sh awscli.sh'
+    
+  ```bash
+  git clone https://github.com/sanjukuruvilla/scripts.git
+  ```
 
-[Script Repository](https://github.com/sanjukuruvilla/scripts.git)
-Make sure to give execution permission using 'chmod +x TF.sh awscli.sh'
 
 ## Overview
 
