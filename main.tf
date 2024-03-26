@@ -218,3 +218,16 @@ output "public_ip_addresses" {
 output "private_ip_addresses" {
   value = aws_instance.private_instance.*.private_ip
 }
+
+# Define provisioner to generate instances.txt file
+resource "null_resource" "generate_instances_file" {
+  # Run the provisioner after the instances are created
+  depends_on = [aws_instance.public_instance, aws_instance.private_instance]
+
+  # Run a local command to generate instances.txt
+  provisioner "local-exec" {
+    command = <<-EOT
+      terraform output | grep "private_instance\|public_instance" | grep "ip_address" > instances.txt
+    EOT
+  }
+}
