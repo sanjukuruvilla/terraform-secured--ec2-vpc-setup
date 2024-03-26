@@ -1,4 +1,3 @@
----
 # Terraform Secured EC2 VPC Setup
 
 ## Table of Contents
@@ -111,5 +110,3 @@ Contributions to this project are welcome! If you find any issues or have sugges
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
