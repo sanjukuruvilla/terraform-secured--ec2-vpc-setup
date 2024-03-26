@@ -106,6 +106,23 @@ ssh_cidr_blocks            = ["0.0.0.0/0"] # CIDR blocks allowed for SSH access
 http_cidr_blocks           = ["0.0.0.0/0"] # CIDR blocks allowed for HTTP access
 ```
 
+## Exporting the ips to a file
+
+  - You can use below adhoc command to get all the values in a file called 'Terraform_output.txt'
+
+      ```bash
+      terraform output | grep "private_instance\|public_instance" | grep "ip_address" > instances.txt
+      ```
+## Exporting the output to a file 
+   
+   - You can use below adhoc command to get all the values in a file called 'Terraform_output.txt'
+   
+      ```bash
+      terraform output > Terraform_output.txt
+      ```
+
+
+
 ## Contributing
 
 Contributions to this project are welcome! If you find any issues or have suggestions for improvements, please open an issue or submit a pull request on GitHub.
