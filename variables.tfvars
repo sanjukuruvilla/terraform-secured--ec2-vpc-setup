@@ -1,3 +1,14 @@
-ami_id = "ami-12345678"  # Replace with your desired AMI ID
-instance_type = "t2.micro"  # Replace with your desired instance type
-key_name = "my-keypair"  # Replace with the name of your key pair
+aws_region              = "us-east-1"
+ami_id                  = "ami-12345678"   # Replace with your desired AMI ID
+instance_type           = "t2.micro"       # Replace with your desired instance type
+key_name                = "my-keypair"     # Replace with the name of your key pair
+public_instance_count   = 1                # Specify the desired number of public instances
+private_instance_count  = 1                # Specify the desired number of private instances
+vpc_cidr_block          = "10.0.0.0/16"    # Define the CIDR block for the VPC
+enable_dns_support      = true             # Enable DNS support for the VPC
+enable_dns_hostnames    = true             # Enable DNS hostnames for the VPC
+public_subnet_cidr_block   = "10.0.1.0/24" # Define the CIDR block for the public subnet
+private_subnet_cidr_block  = "10.0.2.0/24" # Define the CIDR block for the private subnet
+availability_zones         = "us-east-1a"  # Specify the availability zone for the subnet
+ssh_cidr_blocks            = ["0.0.0.0/0"] # CIDR blocks allowed for SSH access
+http_cidr_blocks           = ["0.0.0.0/0"] # CIDR blocks allowed for HTTP access
