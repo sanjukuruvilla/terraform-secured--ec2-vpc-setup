@@ -2,119 +2,219 @@
 
 # Define the VPC
 resource "aws_vpc" "my_vpc" {
-  cidr_block = "10.0.0.0/16" # Define the CIDR block for the VPC
-  enable_dns_support = true
-  enable_dns_hostnames = true
+  cidr_block           = var.vpc_cidr_block
+  enable_dns_support   = var.enable_dns_support
+  enable_dns_hostnames = var.enable_dns_hostnames
   tags = {
-    Name = "my-vpc" # Add tags to identify the VPC
+    Name = "my-vpc"
   }
 }
 
-# subnet
-
 # Define public subnet
 resource "aws_subnet" "public_subnet" {
-  vpc_id            = aws_vpc.my_vpc.id # Associate subnet with the VPC
-  cidr_block        = "10.0.1.0/24" # Define the CIDR block for the subnet
-  availability_zone = "us-east-1a" # Specify the desired availability zone
-  map_public_ip_on_launch = true # Enable auto-assign public IP addresses
+  vpc_id            = aws_vpc.my_vpc.id
+  cidr_block        = var.public_subnet_cidr_block
+  availability_zone = var.availability_zone
+  map_public_ip_on_launch = true
   tags = {
-    Name = "public-subnet" # Add tags to identify the subnet
+    Name = "public-subnet"
   }
-  depends_on = [aws_vpc.my_vpc] # Ensure VPC is created first
 }
 
 # Define private subnet
 resource "aws_subnet" "private_subnet" {
-  vpc_id            = aws_vpc.my_vpc.id # Associate subnet with the VPC
-  cidr_block        = "10.0.2.0/24" # Define the CIDR block for the subnet
-  availability_zone = "us-east-1a" # Specify the desired availability zone
+  vpc_id            = aws_vpc.my_vpc.id
+  cidr_block        = var.private_subnet_cidr_block
+  availability_zone = var.availability_zone
   tags = {
-    Name = "private-subnet" # Add tags to identify the subnet
+    Name = "private-subnet"
   }
-  depends_on = [aws_vpc.my_vpc] # Ensure VPC is created first
 }
 
-# security_groups
+# Define public NACL
+resource "aws_network_acl" "public_nacl" {
+  vpc_id = aws_vpc.my_vpc.id
+  subnet_ids = [aws_subnet.public_subnet.id]
+
+  egress {
+    protocol   = "-1"
+    rule_no    = 100
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+  }
+
+  ingress {
+    protocol   = "tcp"
+    rule_no    = 100
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port  = 80
+    to_port    = 80
+  }
+}
+
+# Define private NACL
+resource "aws_network_acl" "private_nacl" {
+  vpc_id = aws_vpc.my_vpc.id
+  subnet_ids = [aws_subnet.private_subnet.id]
+
+  egress {
+    protocol   = "-1"
+    rule_no    = 100
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+  }
+
+  ingress {
+    protocol   = "tcp"
+    rule_no    = 100
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port  = 22
+    to_port    = 22
+  }
+}
+
+# Define public route table
+resource "aws_route_table" "public_route_table" {
+  vpc_id = aws_vpc.my_vpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.my_igw.id
+  }
+
+  tags = {
+    Name = "public-route-table"
+  }
+}
+
+# Associate public subnet with public route table
+resource "aws_route_table_association" "public_subnet_association" {
+  subnet_id      = aws_subnet.public_subnet.id
+  route_table_id = aws_route_table.public_route_table.id
+}
+
+# Define private route table
+resource "aws_route_table" "private_route_table" {
+  vpc_id = aws_vpc.my_vpc.id
+
+  tags = {
+    Name = "private-route-table"
+  }
+}
+
+# Associate private subnet with private route table
+resource "aws_route_table_association" "private_subnet_association" {
+  subnet_id      = aws_subnet.private_subnet.id
+  route_table_id = aws_route_table.private_route_table.id
+}
+
+# Define internet gateway
+resource "aws_internet_gateway" "my_igw" {
+  vpc_id = aws_vpc.my_vpc.id
+}
 
 # Define security group for public instances
 resource "aws_security_group" "public_sg" {
-  name        = "public-sg" # Specify the name of the security group
-  vpc_id      = aws_vpc.my_vpc.id # Associate security group with the VPC
+  name        = "public-sg"
+  vpc_id      = aws_vpc.my_vpc.id
 
-  # Allow inbound SSH traffic
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # Allow inbound HTTP traffic
   ingress {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = var.http_cidr_blocks
   }
 
-  # Allow outbound traffic
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = var.ssh_cidr_blocks
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  depends_on = [aws_vpc.my_vpc] # Ensure VPC is created first
 }
 
 # Define security group for private instances
 resource "aws_security_group" "private_sg" {
-  name        = "private-sg" # Specify the name of the security group
-  vpc_id      = aws_vpc.my_vpc.id # Associate security group with the VPC
+  name        = "private-sg"
+  vpc_id      = aws_vpc.my_vpc.id
 
-  # Allow inbound traffic from public subnet
   ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = [aws_subnet.public_subnet.cidr_block]
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = var.ssh_cidr_blocks
   }
 
-  # Allow outbound traffic
   egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  depends_on = [aws_vpc.my_vpc, aws_subnet.public_subnet] # Ensure VPC and public subnet are created first
 }
-
-# instances.tf
 
 # Define public EC2 instance
 resource "aws_instance" "public_instance" {
-  ami             = var.ami_id # Specify the desired AMI ID
-  instance_type   = var.instance_type # Specify the instance type
-  subnet_id       = aws_subnet.public_subnet.id # Associate instance with public subnet
-  vpc_security_group_ids = [aws_security_group.public_sg.id] # Associate instance with public security group
-  key_name        = var.key_name # Specify the key pair name for SSH access
-  tags = {
-    Name = "public-instance" # Add tags to identify the instance
-  }
-  depends_on = [aws_vpc.my_vpc, aws_subnet.public_subnet, aws_security_group.public_sg] # Ensure VPC, public subnet, and security group are created first
+  ami             = var.ami_id
+  count           = var.public_instance_count 
+  instance_type   = var.instance_type
+  subnet_id       = aws_subnet.public_subnet.id
+  vpc_security_group_ids = [aws_security_group.public_sg.id]
+  key_name        = var.key_name
+  user_data     = var.user_data
 }
 
 # Define private EC2 instance
 resource "aws_instance" "private_instance" {
-  ami             = var.ami_id # Specify the desired AMI ID
-  instance_type   = var.instance_type # Specify the instance type
-  subnet_id       = aws_subnet.private_subnet.id # Associate instance with private subnet
-  vpc_security_group_ids = [aws_security_group.private_sg.id] # Associate instance with private security group
-  tags = {
-    Name = "private-instance" # Add tags to identify the instance
-  }
-  depends_on = [aws_vpc.my_vpc, aws_subnet.private_subnet, aws_security_group.private_sg] # Ensure VPC, private subnet, and security group are created first
+  ami             = var.ami_id
+  count           = var.private_instance_count
+  instance_type   = var.instance_type
+  subnet_id       = aws_subnet.private_subnet.id
+  vpc_security_group_ids = [aws_security_group.private_sg.id]
+  key_name        = var.key_name
+  user_data     = var.user_data
 }
 
+##Lifecycle management
+resource "aws_instance" "Instance_creation"{
+  lifecycle {
+      create_before_destroy = true
+    }
+}
+
+##Tagging the instances
+##Tagging public instances
+resource "aws_instance" "tg_public_instance" {
+  count = var.public_instance_count # Define the number of public instances to create
+
+  tags = {
+    Name = "Public ${count.index + 1}"  # Set the Name tag to "Public 1" for the first private instance, "Public 2" for the second, and so on
+  }
+}
+
+##Tagging private instances
+resource "aws_instance" "tg_private_instance" {
+  count = var.private_instance_count # Define the number of private instances to create
+
+  tags = {
+    Name = "Private ${count.index + 1}"  # Set the Name tag to "Private 1" for the first private instance, "Private 2" for the second, and so on
+  }
+}
+
+##Getting the ip addresses for public and private instances
+output "public_ip_addresses" {
+  value = aws_instance.public_instance.*.public_ip
+}
+
+output "private_ip_addresses" {
+  value = aws_instance.private_instance.*.private_ip
+}
