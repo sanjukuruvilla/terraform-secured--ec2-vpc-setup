@@ -104,7 +104,7 @@ http_cidr_blocks           = ["0.0.0.0/0"] # CIDR blocks allowed for HTTP access
 
 ## Contributing
 
-Contributions to this project are welcome! If you find any issues or have suggestions for improvements, please open an issue or submit a pull request on GitHub. Before contributing, please review the [contribution guidelines](CONTRIBUTING.md).
+Contributions to this project are welcome! If you find any issues or have suggestions for improvements, please open an issue or submit a pull request on GitHub.
 
 
 ## License
