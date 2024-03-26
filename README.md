@@ -25,7 +25,7 @@ Make sure to give execution permission using 'chmod +x TF.sh awscli.sh'
 
 ## Overview
 
-This repository contains Terraform configuration files to provision infrastructure for a small project on AWS. The infrastructure includes a Virtual Private Cloud (VPC), public and private subnets, security groups, and EC2 instances.
+This repository contains Terraform configuration files to provision secure infrastructure  on AWS. The infrastructure includes a Virtual Private Cloud (VPC), public and private subnets, security groups, and EC2 instances.
 
 ## Terraform Files
 
