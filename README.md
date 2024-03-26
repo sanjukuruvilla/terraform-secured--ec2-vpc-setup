@@ -110,7 +110,7 @@ http_cidr_blocks           = ["0.0.0.0/0"] # CIDR blocks allowed for HTTP access
 
 ## Exporting the ips to a file
 
-  - You can use below adhoc command to get all the values in a file called 'Terraform_output.txt'
+  - You can use below adhoc command to get all instance ip addresses in a file called 'instances.txt'
 
       ```bash
       terraform output | grep "private_instance\|public_instance" | grep "ip_address" > instances.txt
